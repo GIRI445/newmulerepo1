@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="deltaflights-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8083" />
+    </http:listener-config>
+    <apikit:config name="deltaflights-config" api="deltaflights.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<flow name="deltaflights-main">
+        <http:listener config-ref="deltaflights-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <flow-ref doc:name="Flow Reference" doc:id="eb530ca8-b30d-4e90-83f8-d69036fee934" name="deltaflightsSub_Flow"/>
+		<error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="deltaflights-console">
+        <http:listener config-ref="deltaflights-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="deltaflights-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <sub-flow name="deltaflightsSub_Flow" doc:id="0ad80095-d2ca-40b9-984d-b368ffa3c4c7" >
+		<set-variable value="#[message.attributes.queryParams.flow]" doc:name="Set Variable" doc:id="ac5397b9-11cf-44a0-ba52-ce6feb97a052" variableName="flow"/>
+		<choice doc:name="Choice" doc:id="fcf4a86d-ef18-43d0-ad13-3cae56c93604" >
+			<when expression='#[vars.flow == "filter"]'>
+				<flow-ref doc:name="Flow Reference" doc:id="97e156cb-aec5-43d7-85f1-928229efd965" name="get:\DeltaFlights\Filter:deltaflights-config"/>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="Flow Reference" doc:id="8d293983-6472-4344-a2de-762d473defb1" name="get:\DeltaFlights:deltaflights-config"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<flow name="get:\DeltaFlights:deltaflights-config" doc:id="53b82d32-9875-4079-8598-101223fdfd6b">
+        <file:read doc:name="Read" doc:id="afe2ca8b-f660-48ae-9596-76b6f8e2ba75" path="C:\Users\GI20416241\Desktop\New folder\Delta.json"/>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.flights map ( flight , indexOfFlight ) -> {
+	airlineName: flight.airlineName,
+	availableSeats: flight.emptySeats,
+	departureDate: flight.departureDate,
+	destination: flight.destination,
+	flightCode: flight.code,
+	origination: flight.origin,
+	planeType: flight.planeType,
+	price: flight.price
+} ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="ee19c5b8-3a00-4400-81ea-4b111b0798a3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\DeltaFlights\Filter:deltaflights-config" doc:id="2232eede-8a0b-4ea0-84e7-3e130136f062">
+        <ee:transform doc:name="Transform Message" doc:id="42308e74-219c-40b0-9d05-d205dfef4263" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    "Airline Name": "Delta",
+    "Code": "rree1093",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-02-11T00:00:00",
+    "Available Seats": 1,
+    "Price": 142.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "eefd1994",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-01-01T00:00:00",
+    "Available Seats": 0,
+    "Price": 676.0,
+    "PlaneType": "Boeing 777"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "ffee2000",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-02-20T00:00:00",
+    "Available Seats": 30,
+    "Price": 300.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "eefd3000",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-02-01T00:00:00",
+    "Available Seats": 0,
+    "Price": 900.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "rree4567",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-01-20T00:00:00",
+    "Available Seats": 100,
+    "Price": 456.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "ER38sd",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2015/03/20",
+    "Available Seats": 0,
+    "Price": 400.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "ER45if",
+    "From": "MUA",
+    "To": "LAX",
+    "Plan Date": "2015/02/11",
+    "Available Seats": 52,
+    "Price": 345.99,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "ER38sd",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2015/03/20",
+    "Available Seats": 0,
+    "Price": 400.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "Delta",
+    "Code": "ER45if",
+    "From": "MUA",
+    "To": "LAX",
+    "Plan Date": "2015/02/11",
+    "Available Seats": 52,
+    "Price": 345.99,
+    "PlaneType": "Boeing 737"
+  }
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[
+%dw 2.0
+output application/json
+---
+
+		(payload filter ($."Airline Name" == attributes.queryParams.airlineName )
+        filter ($."From" == attributes.queryParams.Origin)
+        filter ($."Price" > attributes.queryParams.Price)
+        filter ($."To" == attributes.queryParams.Destination)
+        filter ($."Available Seats">attributes.queryParams.emptySeats)
+        
+        )
+	
+  
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="deltaflightsFlow" doc:id="eb1e8b5c-04e9-432e-b210-9c1e74a6438d">
+		<apikit:router config-ref="deltaflights-config" />
+	</flow>
+</mule>

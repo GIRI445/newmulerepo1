@@ -1,0 +1,26 @@
+#%RAML 1.0 Trait
+
+    queryParameters: 
+      flightclass:
+        enum:
+          - Economy
+          - First Class
+          - Premium
+      fromAirportCode:
+        example: "Bangalore"
+      id?:
+        example: "1"
+      airline?:
+        example: Delta
+      toAirportCode:
+        example: "Delhi"
+      emptySeats?:
+        example: "10"
+      price:
+        example: "400"
+      flightCode:
+        example: ER38fg
+      departureDate:
+        example: 2015-12-17T00:00:00Z 
+      planeType?:
+        example: "Boeing 747" 
