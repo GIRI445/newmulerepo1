@@ -1,0 +1,9 @@
+http:
+  version: "v1"
+  America:
+    path: "AmericanFlights"
+    port: "8082"
+  Delta:
+    path: "DeltaFlights"
+    port: "8083"
+  

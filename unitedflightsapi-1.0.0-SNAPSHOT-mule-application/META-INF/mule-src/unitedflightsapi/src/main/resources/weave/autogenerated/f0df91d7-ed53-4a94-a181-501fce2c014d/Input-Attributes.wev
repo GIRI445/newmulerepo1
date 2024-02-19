@@ -1,0 +1,37 @@
+%dw 2.0
+
+type auto_f0df91d7_ed53_4a94_a181_501fce2c014d_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {|
+    client_id: String, 
+    client_secret: String
+  |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    flightclass: "First Class" | "Economy" | "Premium", 
+    fromAirportCode: String, 
+    id?: String, 
+    airline?: String, 
+    toAirportCode: String, 
+    emptySeats?: String, 
+    price: String, 
+    flightCode: String, 
+    departureDate: String, 
+    planeType?: String
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {|  |}, 
+  version: String, 
+  localAddress: String
+|}
+

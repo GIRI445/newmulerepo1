@@ -1,0 +1,18 @@
+%dw 2.0
+
+type auto_41fc3198_ccae_4f09_9b8b_fe1a20e8eb64_Output_Attributes = org_mule_extension_file_api_LocalFileAttributes | Null
+type org_mule_extension_file_api_LocalFileAttributes = {|
+  lastModifiedTime: DateTime {"typeId": "java.time.LocalDateTime"}, 
+  lastAccessTime: DateTime {"typeId": "java.time.LocalDateTime"}, 
+  creationTime: DateTime {"typeId": "java.time.LocalDateTime"}, 
+  size: Number, 
+  regularFile?: Boolean {"typeId": "boolean"}, 
+  directory?: Boolean {"typeId": "boolean"}, 
+  symbolicLink?: Boolean {"typeId": "boolean"}, 
+  path: String, 
+  fileName: String
+|} {"typeAlias": "LocalFileAttributes",
+"typeId": "org.mule.extension.file.api.LocalFileAttributes"}
+
+
+

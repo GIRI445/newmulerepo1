@@ -1,0 +1,38 @@
+[
+    {
+      "ID":1,
+      "airline": "United",
+      "flightCode": "ER38sd",
+      "fromAirportCode": "Bangalore",
+      "toAirportCode": "Delhi",
+      "departureDate": "2015-12-17T00:00:00Z",
+      "emptySeats": 0,
+      "totalSeats": 200,
+      "price": 199,
+      "planeType": "Boeing 737"
+    },
+    {
+      "ID": 2,
+      "airline": "United",
+      "flightCode": "ER376td",
+      "fromAirportCode": "Pune",
+      "toAirportCode": "Hyderabad",
+      "departureDate": "2015-12-17T00:00:00Z",
+      "emptySeats": 24,
+      "totalSeats": 350,
+      "price": 450,
+      "planeType": "Boeing 747"
+    },
+    {
+      "ID": 3,
+      "airline": "United",
+      "flightCode": "ER38fg",
+      "fromAirportCode": "Mumbai",
+      "toAirportCode": "Hyderabad",
+      "departureDate": "2015-12-17T00:00:00Z",
+      "emptySeats": 220,
+      "totalSeats": 300,
+      "price": 340,
+      "planeType": "Boeing 747"
+      }
+    ]

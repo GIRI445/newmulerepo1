@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="americaflights-httpListenerConfig">
+        <http:listener-connection host="localhost" port="8082" />
+    </http:listener-config>
+    <apikit:config name="americaflights-config" api="americaflights.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="americaflights-main">
+        <http:listener config-ref="americaflights-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <flow-ref doc:name="Flow Reference" doc:id="0eec4d7e-28b5-48c4-a72e-c52940a86809" name="americaflightsSub_Flow"/>
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="americaflights-console">
+        <http:listener config-ref="americaflights-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="americaflights-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+	<sub-flow name="americaflightsSub_Flow" doc:id="e61ee06c-3258-4400-b10d-10a2cade7c28" >
+		<set-variable value="#[message.attributes.queryParams.flow]" doc:name="Set Variable" doc:id="cf703e1f-c4ec-43a3-ab86-8d0466b8b540" variableName="flow"/>
+		<choice doc:name="Choice" doc:id="5e89f225-2c12-47e7-82a3-9aae719e947d" >
+			<when expression='vars.flow == "filter"'>
+				<flow-ref doc:name="Flow Reference" doc:id="87c6e7a5-7cbd-42ae-9be4-617c5bc4f51b" name="get:\AmericanFlights\Filter:americaflights-config"/>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="Flow Reference" doc:id="269e6708-26c3-4450-9223-7fff66458ee8" name="get:\AmericanFlights:americaflights-config"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<flow name="get:\AmericanFlights:americaflights-config" doc:id="0d996360-c803-4bc7-89c0-9ef7fec1bcfb">
+        <file:read doc:name="Read" doc:id="2feb7fa2-89de-4c24-9d50-9f453f6ca3b0" path="C:\Users\GI20416241\Desktop\New folder\usa.json"/>
+		<ee:transform doc:name="Transform Message" doc:id="8f139e49-bdbb-4f36-a806-2bda6db3b556" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.flights map ( flight , indexOfFlight ) -> {
+	airlineName: flight.airlineName,
+	availableSeats: flight.emptySeats,
+	departureDate: flight.departureDate,
+	destination: flight.destination,
+	flightCode: flight.code,
+	origination: flight.origin,
+	planeType: flight.planeType,
+	price: flight.price
+} ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\AmericanFlights\Filter:americaflights-config" doc:id="8e224f39-45a5-4c91-9d53-bb9ed9c5b4a0">
+        <ee:transform doc:name="Transform Message" doc:id="d9a72918-a6e1-4c50-9495-3216d3341549" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    "Airline Name": "American",
+    "Code": "rree1093",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-02-11T00:00:00",
+    "Available Seats": 1,
+    "Price": 142.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "eefd1994",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-01-01T00:00:00",
+    "Available Seats": 0,
+    "Price": 676.0,
+    "PlaneType": "Boeing 777"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "ffee2000",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-02-20T00:00:00",
+    "Available Seats": 30,
+    "Price": 300.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "eefd3000",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-02-01T00:00:00",
+    "Available Seats": 0,
+    "Price": 900.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "rree4567",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2016-01-20T00:00:00",
+    "Available Seats": 100,
+    "Price": 456.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "ER38sd",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2015/03/20",
+    "Available Seats": 0,
+    "Price": 400.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "ER45if",
+    "From": "MUA",
+    "To": "LAX",
+    "Plan Date": "2015/02/11",
+    "Available Seats": 52,
+    "Price": 345.99,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "ER38sd",
+    "From": "MUA",
+    "To": "SFO",
+    "Plan Date": "2015/03/20",
+    "Available Seats": 0,
+    "Price": 400.0,
+    "PlaneType": "Boeing 737"
+  },
+  {
+    "Airline Name": "American",
+    "Code": "ER45if",
+    "From": "MUA",
+    "To": "LAX",
+    "Plan Date": "2015/02/11",
+    "Available Seats": 52,
+    "Price": 345.99,
+    "PlaneType": "Boeing 737"
+  }
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[
+%dw 2.0
+output application/json
+---
+
+		(payload filter ($."Airline Name" == attributes.queryParams.airlineName )
+        filter ($."From" == attributes.queryParams.Origin)
+        filter ($."Price" > attributes.queryParams.Price)
+        filter ($."To" == attributes.queryParams.Destination)
+        filter ($."Available Seats">attributes.queryParams.emptySeats)
+        
+        )
+	
+  
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="americaflightsFlow" doc:id="64f7037e-1f6a-4310-9a51-7d9e3d718e5a" >
+		<apikit:router config-ref="americaflights-config" />
+	</flow>
+</mule>

@@ -1,0 +1,38 @@
+#%RAML 1.0
+title: AmericaFlights
+
+uses:
+  FlightDetails: library.raml
+traits:
+  reuse: !include exchange_modules/73ffa688-f052-4f65-a53a-cb0491bacec5/flighttraits/1.0.0/flighttraits.raml
+  errorResponse: !include exchange_modules/73ffa688-f052-4f65-a53a-cb0491bacec5/errorresponses/1.0.0/errorresponses.raml
+  headers: !include exchange_modules/73ffa688-f052-4f65-a53a-cb0491bacec5/headers/1.0.0/headers.raml
+/AmericanFlights:
+  is: [reuse,errorResponse,headers]
+  get:
+    queryParameters: 
+      flightclass:
+        enum:
+          - Economy
+          - First Class
+          - Premium  
+    responses:
+      200:
+        body:
+          application/json:
+            type: FlightDetails.flightType
+  /Filter:
+    is: [reuse,errorResponse,headers]
+    get:
+      queryParameters: 
+        flightclass:
+          enum:
+          - Economy
+          - First Class
+          - Premium
+      responses:
+        200:
+          body:
+            application/json:
+              type: FlightDetails.flightType
+ 

@@ -1,0 +1,45 @@
+#%RAML 1.0 Library
+usage:
+  flightType:
+    properties:
+      fromAirportCode:
+        example: "Bangalore"
+        type: string
+        minLength: 3
+        maxLength: 15
+        required: true
+      id?:
+        type: integer
+      airline?:
+        type: string
+        example: Delta
+        minLength: 3
+        maxLength: 15 
+      toAirportCode:
+        example: "Delhi"
+        type: string
+        minLength: 3
+        maxLength: 15
+        required: true
+      emptySeats?:
+        example: 10
+        type: integer
+      price:
+        type: number
+        example: 400
+        required: true
+      flightCode:
+        type: any
+        required: true
+        example: ER38fg
+      departureDate:
+        type: datetime
+        required: true 
+        example: 2015-12-17T00:00:00Z 
+      planeType?:
+        type: string
+        minLength: 3
+        maxLength: 15
+        example: "Boeing 747"   
+    
+

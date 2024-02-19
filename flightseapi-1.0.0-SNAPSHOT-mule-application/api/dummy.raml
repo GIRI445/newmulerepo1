@@ -1,0 +1,72 @@
+#%RAML 1.0
+title: dummy
+
+types:
+  FlightDetails: !include datatypes/dataType.raml
+traits:
+  reuse: !include traits/reusable.raml
+  errorResponse: !include traits/errorResponses.raml
+  headers: !include traits/headers.raml
+/Flights:
+  is: [reuse,errorResponse,headers]
+  get:
+    queryParameters: 
+      flightclass:
+        enum:
+          - Economy
+          - First Class
+          - Premium  
+    responses:
+      200:
+        body:
+          application/json:
+            type: FlightDetails[]
+            example: !include examples/allFlights.json
+  post:
+    body:
+      application/json:
+        type: FlightDetails[]
+        examples:
+          input: !include examples/allFlights.json
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Flight added (but not really)
+  /AmericanFlights:
+    is: [reuse,errorResponse,headers]
+    get:
+      queryParameters: 
+        flightclass:
+          enum:
+          - Economy
+          - First Class
+          - Premium
+      responses:
+        200:
+          body:
+            application/json:
+              type: FlightDetails[]
+              example: !include examples/AmericanFlights.json
+  /DeltaFlights:
+    is: [reuse,errorResponse,headers]
+    get:
+      queryParameters: 
+        flightclass:
+          enum:
+          - Economy
+          - First Class
+          - Premium
+      responses:
+        200:
+          body:
+            application/json:
+              type: FlightDetails[]
+              example: !include examples/DeltaFlights.json
+
+            
+            
+
+  
+      
